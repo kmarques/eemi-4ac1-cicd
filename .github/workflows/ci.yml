@@ -33,7 +33,7 @@ jobs:
         run: php-cs-fixer check src --diff --show-progress none
         continue-on-error: true
       - name: "PHPStan"
-        run: phpstan analyse src --level=9
+        run: vendor/bin/phpstan analyse src --level=9
       - name: "Check Database healthy"
         run: nc -vz 127.0.0.1 3306
       - name: "Start migrations"
