@@ -9,15 +9,6 @@ jobs:
   deps:
     name: "Install depedencies"
     runs-on: "ubuntu-latest"
-    services:
-      database:
-        image: mysql
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: app_test
-          MYSQL_ROOT_HOST: "%"
-        ports:
-          - 3306:3306
     steps:
       - uses: actions/checkout@v4
       - name: Cache Vendors
@@ -41,8 +32,21 @@ jobs:
       - name: "PHPStan"
         run: vendor/bin/phpstan analyse src --level=9
 
-  unit_tests:
+  build:
     needs: ["deps"]
+    name: "Build"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
+        with:
+          path: vendor
+          key: vendor-${{ hashFiles('**/composer.lock') }}
+      - name: "Build"
+        run: echo "Build project"
+
+  unit_tests:
+    needs: ["build"]
     name: "Unit tests"
     runs-on: "ubuntu-latest"
     steps:
@@ -55,9 +59,18 @@ jobs:
         run: php bin/phpunit tests/_1_Unit
 
   functional_tests:
-    needs: ["deps"]
-    name: "Unit tests"
+    needs: ["build"]
+    name: "Functional tests"
     runs-on: "ubuntu-latest"
+    services:
+      database:
+        image: mysql
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: app_test
+          MYSQL_ROOT_HOST: "%"
+        ports:
+          - 3306:3306
     steps:
       - uses: actions/checkout@v4
       - uses: actions/cache/restore@v4
