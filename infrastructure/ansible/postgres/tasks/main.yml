@@ -1,0 +1,13 @@
+- name: "Install postgresql"
+  ansible.builtin.apt:
+    name: "postgresql"
+    state: "present"
+  notify: ["Enable postgres", "Start postgres"]
+- name: "Create app user on postgresql"
+  ansible.builtin.shell:
+    cmd: 'psql -c "CREATE USER {{ app_db_user }} WITH PASSWORD ''{{ app_db_password }}'';"'
+  become: true
+  become_user: postgres
+  register: pg_create_user
+  failed_when: "'already exists' not in pg_create_user.stderr"
+  changed_when: pg_create_user.rc == 0

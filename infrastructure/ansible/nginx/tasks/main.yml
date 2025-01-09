@@ -1,0 +1,11 @@
+- name: "Install nginx"
+  ansible.builtin.apt:
+    name: "nginx"
+    state: "present"
+  notify: ["Enable nginx", "Start nginx"]
+- name: "Install nginx conf"
+  ansible.builtin.template:
+    src: "./templates/nginx.conf.j2"
+    dest: "/etc/nginx/sites-available/default"
+    mode: "0644"
+  notify: ["Reload nginx"]
